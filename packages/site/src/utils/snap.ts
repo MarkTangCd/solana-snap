@@ -64,7 +64,7 @@ export const sendHello = async () => {
 export const getAccountInfo = async () => {
   const account = await window.ethereum.request({
     method: 'wallet_invokeSnap',
-    params: { snapId: defaultSnapOrigin, request: { method: 'connect' } }
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_connect' } }
   });
   return account;
 }

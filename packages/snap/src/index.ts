@@ -1,35 +1,27 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
-import { connect } from './service/account';
+import { solConnect, solGetAccount, solGetBalance, solGetTransactions } from './service/account';
 
-/**
- * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
- *
- * @param args - The request handler args as object.
- * @param args.origin - The origin of the request, e.g., the website that
- * invoked the snap.
- * @param args.request - A validated JSON-RPC request object.
- * @returns The result of `snap_dialog`.
- * @throws If the request method is not valid for this snap.
- */
 export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
   switch (request.method) {
-    case 'hello':
-      return snap.request({
-        method: 'snap_dialog',
-        params: {
-          type: 'Confirmation',
-          content: panel([
-            text(`Hello, **${origin}**!`),
-            text('This custom confirmation is just for display purposes.'),
-            text(
-              'But you can edit the snap source code to make it do something, if you want to!',
-            ),
-          ]),
-        },
-      });
-    case 'connect':
-      return connect();
+    case 'sol_export_private':
+      return null;
+    case 'sol_sign_transaction':
+      return null;
+    case 'sol_send_transaction':
+      return null;
+    case 'sol_get_address':
+      return null;
+    case 'sol_get_recent_blockhash':
+      return null;
+    case 'sol_get_transactions':
+      return solGetTransactions();
+    case 'sol_get_balance':
+      return solGetBalance();
+    case 'sol_get_account':
+      return solGetAccount();
+    case 'sol_connect':
+      return solConnect();
     default:
       throw new Error('Method not found.');
   }
