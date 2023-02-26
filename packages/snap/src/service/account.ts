@@ -1,6 +1,7 @@
 import { SLIP10Node, JsonSLIP10Node } from '@metamask/key-tree';
 import { Keypair, Ed25519SecretKey } from '@solana/web3.js';
 import { getAccountInfo, getBalance, getTransactions } from '../modules/connection';
+import { showAccountInfoDialog, showConfirmationDialog, showLoading } from '../utils';
 
 async function getKeypair() {
   const solanaNode: JsonSLIP10Node = await snap.request({
@@ -36,6 +37,31 @@ export async function solExportPrivate() {
 
 export async function solTransaction(to: string, amount: number) {
   return null;
+}
+
+export async function solConnect() {
+  let result = await showConfirmationDialog({
+    prompt: 'Are you sure you want to connect the Solana wallet from MemaMask?',
+    description: 'This will take the Solana address of your current account, and the balance of that address',
+  });
+
+  if (result) {
+    await showLoading();
+    const { address } = await solGetAddress();
+    const balance = await solGetBalance();
+
+    await showAccountInfoDialog(address, balance);
+
+    return {
+      address,
+      balance
+    }
+  }
+
+  return {
+    address: '',
+    balance: 0
+  }
 }
 
 export async function solGetAccount() {

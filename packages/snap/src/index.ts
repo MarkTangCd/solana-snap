@@ -1,6 +1,6 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
-import { solExportPrivate, solTransaction, solGetAccount, solGetBalance, solGetAddress, solGetTransactions } from './service/account';
+import { solExportPrivate, solConnect, solTransaction, solGetAccount, solGetBalance, solGetAddress, solGetTransactions } from './service/account';
 
 export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
   switch (request.method) {
@@ -8,6 +8,8 @@ export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
       return solExportPrivate();
     // case 'sol_send_transaction':
       // return solTransaction();
+    case 'sol_connect':
+      return solConnect();
     case 'sol_get_transactions':
       return solGetTransactions();
     case 'sol_get_balance':
