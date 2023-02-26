@@ -50,16 +50,14 @@ export const getSnap = async (version?: string): Promise<Snap | undefined> => {
   }
 };
 
-/**
- * Invoke the "hello" method from the example snap.
- */
-
-export const sendHello = async () => {
-  await window.ethereum.request({
+export const getTransactions = async () => {
+  const transactions = await window.ethereum.request({
     method: 'wallet_invokeSnap',
-    params: { snapId: defaultSnapOrigin, request: { method: 'hello' } },
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_get_transactions' } }
   });
-};
+
+  return transactions;
+}
 
 export const getAccountInfo = async () => {
   const account = await window.ethereum.request({
@@ -67,6 +65,22 @@ export const getAccountInfo = async () => {
     params: { snapId: defaultSnapOrigin, request: { method: 'sol_connect' } }
   });
   return account;
+}
+
+export const getAddress = async () => {
+  const address = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_get_address' } }
+  });
+  return address;
+}
+
+export const getBalance = async () => {
+  const balance = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_get_balance' } }
+  });
+  return balance;
 }
 
 export const isLocalSnap = (snapId: string) => snapId.startsWith('local:');

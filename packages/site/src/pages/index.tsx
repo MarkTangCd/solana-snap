@@ -4,9 +4,11 @@ import { MetamaskActions, MetaMaskContext } from '../hooks';
 import {
   connectSnap,
   getSnap,
-  sendHello,
   getAccountInfo,
+  getTransactions,
   shouldDisplayReconnectButton,
+  getAddress,
+  getBalance,
 } from '../utils';
 import {
   ConnectButton,
@@ -118,9 +120,11 @@ const Index = () => {
     }
   };
 
-  const handleSendHelloClick = async () => {
+  const handleGetBalance = async () => {
     try {
-      await sendHello();
+      const balance = await getBalance();
+      console.log('balance: ');
+      console.log(balance);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -129,9 +133,21 @@ const Index = () => {
 
   const handleGetAccount = async () => {
     try {
-      const account = await getAccountInfo();
-      console.log('Account Info:');
-      console.log(account);
+      // const account = await getAccountInfo();
+      const address = await getAddress();
+      console.log('address and account:');
+      console.log(address);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  }
+
+  const handleGetTransactions = async () => {
+    try {
+      const transactions = await getTransactions();
+      console.log('History transactions:');
+      console.log(transactions);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -194,12 +210,50 @@ const Index = () => {
         )}
         <Card
           content={{
-            title: 'GetAccountInfo',
+            title: 'GetAddress',
             description:
               'Display a custom message within a confirmation screen in MetaMask.',
             button: (
               <GetAccountButton
                 onClick={handleGetAccount}
+                disabled={!state.installedSnap}
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'GetBalance',
+            description:
+              'Display a custom message within a confirmation screen in MetaMask.',
+            button: (
+              <GetAccountButton
+                onClick={handleGetBalance}
+                disabled={!state.installedSnap}
+              />
+            ),
+          }}
+          disabled={!state.installedSnap}
+          fullWidth={
+            state.isFlask &&
+            Boolean(state.installedSnap) &&
+            !shouldDisplayReconnectButton(state.installedSnap)
+          }
+        />
+        <Card
+          content={{
+            title: 'GetTransaction',
+            description:
+              'Display a custom message within a confirmation screen in MetaMask.',
+            button: (
+              <GetAccountButton
+                onClick={handleGetTransactions}
                 disabled={!state.installedSnap}
               />
             ),

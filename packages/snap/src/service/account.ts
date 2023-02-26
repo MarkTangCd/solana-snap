@@ -20,14 +20,22 @@ async function getKeypair() {
   return keypair;
 }
 
-async function getSolConnection() {
-
+export async function solGetAddress() {
+  const keypair = await getKeypair();
+  return {
+    address: keypair.publicKey.toString()
+  }
 }
 
-export async function solConnect() {
+export async function solExportPrivate() {
   const keypair = await getKeypair();
-  const accountInfo = await getAccountInfo(keypair.publicKey.toBase58());
-  return accountInfo;
+  return {
+    privateKey: keypair.secretKey.toString()
+  };
+}
+
+export async function solTransaction(to: string, amount: number) {
+  return null;
 }
 
 export async function solGetAccount() {
@@ -44,6 +52,9 @@ export async function solGetBalance() {
 
 export async function solGetTransactions() {
   const keypair = await getKeypair();
-  const transactions = await getTransactions(keypair.publicKey.toBase58());
-  return transactions;
+  const origin = await getTransactions(keypair.publicKey.toBase58());
+  const transactions = origin.map(item => item?.meta);
+  return {
+    transactions
+  };
 }
