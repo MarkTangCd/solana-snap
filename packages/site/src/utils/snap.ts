@@ -59,10 +59,37 @@ export const getTransactions = async () => {
   return transactions;
 }
 
-export const getAccountInfo = async () => {
+export const connect = async () => {
   const account = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: { snapId: defaultSnapOrigin, request: { method: 'sol_connect' } }
+  });
+  return account;
+}
+
+export const exportPrivateKey = async () => {
+  const privateKey = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_export_private' } }
+  });
+  return privateKey;
+}
+
+export const sendTransaction = async (to: string, amount: number) => {
+  const signature = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: { snapId: defaultSnapOrigin, request: {
+      method: 'sol_send_transaction',
+      params: [to, amount]
+    } }
+  });
+  return signature;
+}
+
+export const getAccount = async () => {
+  const account = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_get_account' } }
   });
   return account;
 }

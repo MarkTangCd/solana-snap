@@ -1,109 +1,40 @@
-import { useContext } from 'react';
-import styled from 'styled-components';
+import { useContext, useState, useEffect } from 'react';
+import {
+  Box,
+  Flex,
+  Button,
+  Heading,
+  Avatar,
+  Input,
+  Textarea,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription
+} from '@chakra-ui/react';
 import { MetamaskActions, MetaMaskContext } from '../hooks';
 import {
   connectSnap,
   getSnap,
-  getAccountInfo,
   getTransactions,
+  sendTransaction,
+  exportPrivateKey,
+  connect,
   shouldDisplayReconnectButton,
   getAddress,
   getBalance,
 } from '../utils';
-import {
-  ConnectButton,
-  InstallFlaskButton,
-  ReconnectButton,
-  GetAccountButton,
-  Card,
-} from '../components';
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  margin-top: 7.6rem;
-  margin-bottom: 7.6rem;
-  ${({ theme }) => theme.mediaQueries.small} {
-    padding-left: 2.4rem;
-    padding-right: 2.4rem;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    width: auto;
-  }
-`;
-
-const Heading = styled.h1`
-  margin-top: 0;
-  margin-bottom: 2.4rem;
-  text-align: center;
-`;
-
-const Span = styled.span`
-  color: ${(props) => props.theme.colors.primary.default};
-`;
-
-const Subtitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.large};
-  font-weight: 500;
-  margin-top: 0;
-  margin-bottom: 0;
-  ${({ theme }) => theme.mediaQueries.small} {
-    font-size: ${({ theme }) => theme.fontSizes.text};
-  }
-`;
-
-const CardContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  max-width: 64.8rem;
-  width: 100%;
-  height: 100%;
-  margin-top: 1.5rem;
-`;
-
-const Notice = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.alternative};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  color: ${({ theme }) => theme.colors.text.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
-  width: 100%;
-
-  & > * {
-    margin: 0;
-  }
-  ${({ theme }) => theme.mediaQueries.small} {
-    margin-top: 1.2rem;
-    padding: 1.6rem;
-  }
-`;
-
-const ErrorMessage = styled.div`
-  background-color: ${({ theme }) => theme.colors.error.muted};
-  border: 1px solid ${({ theme }) => theme.colors.error.default};
-  color: ${({ theme }) => theme.colors.error.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
-  margin-bottom: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
-  width: 100%;
-  ${({ theme }) => theme.mediaQueries.small} {
-    padding: 1.6rem;
-    margin-bottom: 1.2rem;
-    margin-top: 1.2rem;
-    max-width: 100%;
-  }
-`;
 
 const Index = () => {
+  const [address, setAddress] = useState('');
+  const [balance, setBalance] = useState(0);
   const [state, dispatch] = useContext(MetaMaskContext);
+
+  useEffect(() => {
+    console.log('metamask context');
+    console.log(state.installedSnap);
+    console.log(state.isFlask);
+  }, []);
 
   const handleConnectClick = async () => {
     try {
@@ -119,6 +50,17 @@ const Index = () => {
       dispatch({ type: MetamaskActions.SetError, payload: e });
     }
   };
+
+  const handleConnectSolana = async () => {
+    try {
+      const account: any = await connect();
+      setAddress(account.address);
+      setBalance(account.balance);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  }
 
   const handleGetBalance = async () => {
     try {
@@ -155,126 +97,85 @@ const Index = () => {
   }
 
   return (
-    <Container>
-      <Heading>
-        Welcome to <Span>Solana-snap</Span>
-      </Heading>
-      <CardContainer>
+    <Box>
+      {
+        address && (
+        <Flex width={650} padding={2} justifyContent='space-between' alignItems='center'>
+          <Avatar name='Dan Abrahmov' src='https://bit.ly/dan-abramov' />
+          <Box>
+            <Box>
+              Account Address: 
+            </Box>
+            <Box>
+              {address}
+            </Box>
+          </Box>
+          <Box>
+            <Box>
+              Balance: {balance} SOL
+            </Box>
+          </Box>
+        </Flex>
+        )
+      }
+      <Box>
         {state.error && (
-          <ErrorMessage>
-            <b>An error happened:</b> {state.error.message}
-          </ErrorMessage>
+          <Box>
+            <Alert status='error'>
+              <AlertIcon />
+              <AlertTitle>An error happened:</AlertTitle>
+              <AlertDescription>{state.error.message}</AlertDescription>
+            </Alert>
+          </Box>
         )}
-        {!state.isFlask && (
-          <Card
-            content={{
-              title: 'Install',
-              description:
-                'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
-              button: <InstallFlaskButton />,
-            }}
-            fullWidth
-          />
-        )}
-        {!state.installedSnap && (
-          <Card
-            content={{
-              title: 'Connect',
-              description:
-                'Get started by connecting to and installing the Solana snap.',
-              button: (
-                <ConnectButton
-                  onClick={handleConnectClick}
-                  disabled={!state.isFlask}
-                />
-              ),
-            }}
-            disabled={!state.isFlask}
-          />
-        )}
-        {shouldDisplayReconnectButton(state.installedSnap) && (
-          <Card
-            content={{
-              title: 'Reconnect',
-              description:
-                'While connected to a local running snap this button will always be displayed in order to update the snap if a change is made.',
-              button: (
-                <ReconnectButton
-                  onClick={handleConnectClick}
-                  disabled={!state.installedSnap}
-                />
-              ),
-            }}
-            disabled={!state.installedSnap}
-          />
-        )}
-        <Card
-          content={{
-            title: 'GetAddress',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
-            button: (
-              <GetAccountButton
-                onClick={handleGetAccount}
-                disabled={!state.installedSnap}
-              />
-            ),
-          }}
-          disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
-        />
-        <Card
-          content={{
-            title: 'GetBalance',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
-            button: (
-              <GetAccountButton
-                onClick={handleGetBalance}
-                disabled={!state.installedSnap}
-              />
-            ),
-          }}
-          disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
-        />
-        <Card
-          content={{
-            title: 'GetTransaction',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
-            button: (
-              <GetAccountButton
-                onClick={handleGetTransactions}
-                disabled={!state.installedSnap}
-              />
-            ),
-          }}
-          disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
-        />
-        <Notice>
-          <p>
-            Please note that the <b>snap.manifest.json</b> and{' '}
-            <b>package.json</b> must be located in the server root directory and
-            the bundle must be hosted at the location specified by the location
-            field.
-          </p>
-        </Notice>
-      </CardContainer>
-    </Container>
+        <Flex style={{width: '270px', padding: '10px'}} justifyContent='space-between'>
+          {!state.installedSnap && (
+            <Box>
+              <Button colorScheme='blue' onClick={handleConnectClick} disabled={!state.isFlask}>Install</Button>
+            </Box>
+          )}
+          {shouldDisplayReconnectButton(state.installedSnap) && (
+            <>
+              <Box>
+                <Button colorScheme='blue' onClick={handleConnectClick} disabled={!state.installedSnap}>Reinstall</Button>
+              </Box>
+              <Box>
+                <Button colorScheme='pink' onClick={handleConnectSolana} disabled={!state.installedSnap}>Connect Solana</Button>
+              </Box>
+            </>
+          )}
+        </Flex>
+      </Box>
+      {
+        address && (
+          <>
+            <Flex width={700} justifyContent='space-between' padding={2}>
+              <Box>
+                <Button colorScheme='cyan'>Get Address</Button>
+              </Box>
+              <Box>
+                <Button colorScheme='facebook'>Get Account Info</Button>
+              </Box>
+              <Box>
+                <Button>Get Transactions</Button>
+              </Box>
+              <Box>
+                <Button colorScheme='green'>Export Private Key</Button>
+              </Box>
+          </Flex>
+          <Box width={500} height={200} padding={2}>
+            <Heading as='h4' size='md'>
+              Result:
+            </Heading>
+            <Textarea disabled={true} height={200} size='lg'/>
+          </Box>
+          <Box>
+
+          </Box>
+        </>
+        )
+      }
+    </Box>
   );
 };
 
