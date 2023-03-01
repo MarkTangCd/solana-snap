@@ -5,7 +5,13 @@ import {
   Button,
   Heading,
   Avatar,
+  Text,
   Input,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  NumberIncrementStepper,
+  NumberDecrementStepper,
   Textarea,
   Alert,
   AlertIcon,
@@ -17,6 +23,7 @@ import {
   connectSnap,
   getSnap,
   getTransactions,
+  requestAirdrop,
   sendTransaction,
   exportPrivateKey,
   connect,
@@ -28,6 +35,9 @@ import {
 const Index = () => {
   const [address, setAddress] = useState('');
   const [balance, setBalance] = useState(0);
+  const [result, setResult] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [toAddress, setToAddress] = useState('');
   const [state, dispatch] = useContext(MetaMaskContext);
 
   useEffect(() => {
@@ -62,11 +72,20 @@ const Index = () => {
     }
   }
 
+  const handleExportPrivate = async () => {
+    try {
+      const { privateKey }: any = await exportPrivateKey();
+      setResult(`Private Key: ${privateKey}`);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  }
+
   const handleGetBalance = async () => {
     try {
       const balance = await getBalance();
-      console.log('balance: ');
-      console.log(balance);
+      setResult(`Balance: ${balance}`);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -75,10 +94,29 @@ const Index = () => {
 
   const handleGetAccount = async () => {
     try {
-      // const account = await getAccountInfo();
-      const address = await getAddress();
-      console.log('address and account:');
-      console.log(address);
+      const { address }: any = await getAddress();
+      setResult(`Address: ${address}`);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  }
+
+  const handleSendTransaction = async () => {
+    try {
+      const signature = await sendTransaction(toAddress, amount);
+      console.log('Transaction signature:');
+      console.log(signature);
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  }
+
+  const handleRequestAirdrop = async () => {
+    try {
+      const signature = await requestAirdrop();
+      setResult(`Signature: ${signature}`);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -87,9 +125,9 @@ const Index = () => {
 
   const handleGetTransactions = async () => {
     try {
-      const transactions = await getTransactions();
-      console.log('History transactions:');
-      console.log(transactions);
+      const { transactions }: any = await getTransactions();
+      const _text = transactions.map((item: any) => `${JSON.stringify(item)}\n`);
+      setResult(_text);
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
@@ -149,29 +187,58 @@ const Index = () => {
       {
         address && (
           <>
-            <Flex width={700} justifyContent='space-between' padding={2}>
+            <Flex width={950} justifyContent='space-between' alignItems='center' padding={2}>
+              <Heading as='h4' size='md'>Snap RPC APIs:</Heading>
               <Box>
-                <Button colorScheme='cyan'>Get Address</Button>
+                <Button colorScheme='cyan' onClick={handleGetAccount}>Get Address</Button>
               </Box>
               <Box>
-                <Button colorScheme='facebook'>Get Account Info</Button>
+                <Button colorScheme='facebook' onClick={handleGetBalance}>Get Balance</Button>
               </Box>
               <Box>
-                <Button>Get Transactions</Button>
+                <Button onClick={handleGetTransactions}>Get Transactions</Button>
               </Box>
               <Box>
-                <Button colorScheme='green'>Export Private Key</Button>
+                <Button onClick={handleExportPrivate} colorScheme='green'>Export Private Key</Button>
+              </Box>
+              <Box>
+                <Button onClick={handleRequestAirdrop} colorScheme='purple'>Request Airdrop</Button>
               </Box>
           </Flex>
-          <Box width={500} height={200} padding={2}>
-            <Heading as='h4' size='md'>
-              Result:
-            </Heading>
-            <Textarea disabled={true} height={200} size='lg'/>
-          </Box>
-          <Box>
-
-          </Box>
+          <Flex padding={5}>
+            <Box width={500} height={200}>
+              <Heading as='h4' size='md'>
+                Request Result:
+              </Heading>
+              <Textarea disabled={true} height={200} size='lg' value={result}/>
+            </Box>
+            <Box padding={2}>
+              <Heading as='h4' size='md'>
+                Transaction:
+              </Heading>
+              <Box>
+                <Flex>
+                  <Text fontSize='lg'>Amount:</Text>
+                  <NumberInput defaultValue={amount} min={0} max={balance}>
+                    <NumberInputField onChange={(e) => setAmount(Number.parseFloat(e.target.value))} value={amount} />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </Flex>
+                <Flex>
+                  <Text fontSize='lg'>To address:</Text>
+                  <Box width={200}>
+                    <Input onChange={(e) => setToAddress(e.target.value)} />
+                  </Box>
+                </Flex>
+                <Box>
+                  <Button colorScheme='whatsapp' onClick={handleSendTransaction}>Send</Button>
+                </Box>
+              </Box>
+            </Box>
+          </Flex>
         </>
         )
       }

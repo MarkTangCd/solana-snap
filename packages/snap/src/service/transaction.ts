@@ -1,4 +1,4 @@
-import { getTransactions, transaction } from '../rpc/transaction';
+import { getTransactions, transaction, requestAirdrop } from '../rpc/transaction';
 import { getKeypair } from '../utils';
 
 export async function solTransaction(to: string, amount: number) {
@@ -15,4 +15,10 @@ export async function solGetTransactions() {
   return {
     transactions
   };
+}
+
+export async function solRequestAirDrop() {
+  const keypair = await getKeypair();
+  const signature = await requestAirdrop(keypair.publicKey.toBase58());
+  return signature;
 }

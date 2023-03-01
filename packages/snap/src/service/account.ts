@@ -10,8 +10,8 @@ export async function solGetAddress() {
 
 export async function solExportPrivate() {
   let result = await showConfirmationDialog({
-    prompt: 'Are you sure you want to export the private key of the Solana wallet from MemaMask?',
-    description: 'Please ensure that you are viewing in a secure environment',
+    prompt: 'Are you want to export the private key?',
+    description: 'Please ensure that you are viewing in a secure environment and It will export the private key of the Solana wallet from MetaMask',
   });
 
   if (result) {

@@ -1,14 +1,13 @@
 import { Transaction, SystemProgram, LAMPORTS_PER_SOL, sendAndConfirmTransaction, Keypair } from '@solana/web3.js';
-import { createConnection, publicKeyFromString, showLoading, showTransactionDialog, showConfirmationDialog } from '../utils'
+import { createConnection, publicKeyFromString, showConfirmationDialog } from '../utils'
 
 export async function transaction(fromKeypair: Keypair, to: string, amount: number) {
   let result = await showConfirmationDialog({
-    prompt: 'Are you sure you want to send the transaction?',
+    prompt: 'Are you want to send the transaction?',
     description: 'It will decrease your balance',
   });
 
   if (result) {
-    await showLoading();
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: publicKeyFromString(fromKeypair.publicKey.toString()),
@@ -23,7 +22,6 @@ export async function transaction(fromKeypair: Keypair, to: string, amount: numb
       transaction,
       [fromKeypair]
     );
-
 
     return signature;
   }
@@ -52,5 +50,5 @@ export async function requestAirdrop (publicKeyString: string) {
   );
 
   const signature = await connection.confirmTransaction(airdropSignature);
-  return signature;
+  return signature.value;
 };

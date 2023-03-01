@@ -1,11 +1,13 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { solExportPrivate, solConnect, solGetAccount, solGetBalance, solGetAddress } from './service/account';
-import { solTransaction, solGetTransactions } from './service/transaction';
+import { solTransaction, solGetTransactions, solRequestAirDrop } from './service/transaction';
 
 export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
   switch (request.method) {
     case 'sol_export_private':
       return solExportPrivate();
+    case 'sol_request_airdrop':
+      return solRequestAirDrop();
     case 'sol_send_transaction':
       if (!Array.isArray(request.params) || request.params.length !== 2) {
         return Promise.resolve('');

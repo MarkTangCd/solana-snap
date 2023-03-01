@@ -94,6 +94,14 @@ export const getAccount = async () => {
   return account;
 }
 
+export const requestAirdrop = async () => {
+  const signature = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: { snapId: defaultSnapOrigin, request: { method: 'sol_request_airdrop' } }
+  });
+  return signature;
+}
+
 export const getAddress = async () => {
   const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
